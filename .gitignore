@@ -1,3 +1,6 @@
 /saver
 /.idea
+.gitignore
+.*
+ss.sh
 exampleMixer.go
