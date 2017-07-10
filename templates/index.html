@@ -1,0 +1,71 @@
+
+
+<!--args-->`
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<fieldset>
+    <legend>LINK MENU</legend>
+    <a href="/admin/">ADMINKA</a>
+</fieldset>
+
+<fieldset>
+    <legend>Testing Mixer framework</legend>
+    <b>{{upper "Data"}}: </b>{{.}} <br>
+    <b>{{upper "Data.Flash"}}:</b>{{.stack.ss.Flash}} : <br>
+    <b>{{upper "Data.Session"}}</b>:{{.stack.ss.Session}} <br>
+    <b>SESSION:</b> {{.stack.ss.Cook}}<br>
+</fieldset>
+
+{{$realpath := .stack.realpath}}
+{{$command := .stack.command}}
+
+{{if eq $realpath "/user/:command"}}
+<fieldset>
+    <!--register-->
+    {{if eq $command "register"}}
+    <legend>Register form</legend>
+    <form action="/user/register" method="post">
+
+        Email: <input type="text" name="Email" id="" placeholder="{{.stack.form.Desc.LoginEmail}}"
+                      value="{{.stack.form.Stack.LoginEmail}}"><br>
+        <i class="error">
+            {{if .stack.form.Errors.Email}}
+            <strong>{{ .stack.form.Errors.Email}}</strong>
+            {{end}}
+        </i>
+
+        Password: <input type="password" name="Password" id="" placeholder="{{.stack.form.Desc.LoginPassword}}"
+                value="{{.stack.form.Stack.LoginPassword}}"> <br>
+        <i class="error">
+            {{if .stack.form.Errors.Password}}
+            <strong>{{ .stack.form.Errors.Password}}</strong>
+            {{end}}
+        </i>
+
+        Select: <select name="Select" id="" multiple>
+        <option value="#1">User1</option>
+        <option value="#2" selected>User2</option>
+        <option value="#3">User3</option>
+    </select> <br>
+        <i class="error">
+            {{if .stack.form.Errors.Password}}
+            <strong>{{ .stack.form.Errors.Password}}</strong>
+            {{end}}
+        </i>
+
+        <button type="submit">Register</button>
+    </form>
+    {{end}}
+</fieldset>
+{{end}}
+
+
+
+
+</body>
+</html>

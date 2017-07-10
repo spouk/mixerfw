@@ -1,0 +1,28 @@
+{{$realpath := .stack.realpath}}
+{{$command := .stack.command}}
+{{$id := .stack.id}}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<a href="/">MAIN</a>
+<hr>
+<h2>Welcome in admin index</h2>
+<hr>
+{{.}}
+<hr>
+
+{{$paths := makemap "/admin" "/admin/"}}
+{{if eq $realpath "/admin"}}
+    <b>[admin] REALPATH:</b> {{$realpath}} <br>
+{{end}}
+{{if eq $realpath "/admin/cooks"}}
+    <b>[cooks] REALPATH:</b> {{$realpath}} <br>
+{{end}}
+
+</body>
+</html>
