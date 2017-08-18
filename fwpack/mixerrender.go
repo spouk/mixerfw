@@ -12,6 +12,7 @@ import (
 	"math/rand"
 	"os"
 	"io/ioutil"
+	"reflect"
 )
 
 //---------------------------------------------------------------------------
@@ -44,7 +45,7 @@ var (
 		"html2": func(value string) template.HTML {
 			return template.HTML(fmt.Sprint(value))
 		},
-
+		"type" : TypeIs,
 
 	}
 )
@@ -216,6 +217,23 @@ func (s *MixerRenderDefault) ShowStack() {
 //---------------------------------------------------------------------------
 //  рандомные полезные функции для шаблонов
 //---------------------------------------------------------------------------
+//возращает тип аргумента
+func TypeIs(value interface{}) string {
+	v := reflect.ValueOf(value)
+	var result string
+	switch v.Kind() {
+	case reflect.Bool: result = "bool"
+	case reflect.Int, reflect.Int8, reflect.Int32, reflect.Int64: result = "integer"
+	case reflect.Uint, reflect.Uint8, reflect.Uint32, reflect.Uint64: result = "unsigned integer"
+	case reflect.Float32, reflect.Float64: result = "float"
+	case reflect.String: result = "string"
+	case reflect.Slice: result = "slice"
+	case reflect.Map: result = "map"
+	case reflect.Chan: result = "chan"
+	default: result = "undefine type"
+	}
+	return result
+}
 func MapIn(value interface{}, stock interface{}) bool {
 	switch value.(type) {
 	case int64:

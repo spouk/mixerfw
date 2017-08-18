@@ -19,6 +19,7 @@ import (
 	"mixerfw/fwpack"
 	"time"
 	"crypto/md5"
+	"log"
 )
 type (
 	//---------------------------------------------------------------------------
@@ -27,7 +28,8 @@ type (
 	MixerDBS struct {
 		DB *gorm.DB
 		dbinfo DBSInfoDatabase
-		logger Mixer.MixerLogger
+		//logger Mixer.MixerLogger
+		logger *log.Logger
 	}
 	//---------------------------------------------------------------------------
 	//  DBSInfoDatabase: информационная структура для DBS
@@ -48,14 +50,14 @@ type (
 //---------------------------------------------------------------------------
 //  DBS: функционал
 //---------------------------------------------------------------------------
-func NewDBS(dbinfo DBSInfoDatabase, logger Mixer.MixerLogger) *MixerDBS {
+func NewDBS(dbinfo DBSInfoDatabase, logger *log.Logger) *MixerDBS {
 	dbs := new(MixerDBS)
 	dbs.logger = logger
 	db, err := gorm.Open(dbinfo.TypeDB, dbs.dns(dbinfo))
 	fmt.Printf("DBS: %#v : %#v\n", db, err)
 	if err != nil {
 		if dbs.logger != nil {
-			dbs.logger.Error(err.Error())
+			dbs.logger.Fatal(err.Error())
 		} else {
 			fmt.Printf("[dbs][error] %v\n", err)
 		}
