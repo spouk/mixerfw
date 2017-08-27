@@ -54,6 +54,7 @@ type (
 	//---------------------------------------------------------------------------
 	//cook, key, value
 	MixerStaticData struct {
+		sync.RWMutex
 		Data map[string]map[string]string
 	}
 	//---------------------------------------------------------------------------
@@ -438,10 +439,19 @@ func (m *Mixer) newStaticMixerData() *MixerStaticData {
 	return n
 }
 func (m *MixerStaticData) add(cook , key , value  string) bool{
-	m.Data[cook][key] = value
+	m.Lock()
+	if _, found := m.Data[cook]; found {
+		m.Data[cook][key] = value
+	} else {
+		m.Data[cook] = make(map[string]string)
+		m.Data[cook][key] = value
+	}
+	m.Unlock()
 	return true
 }
 func (m *MixerStaticData) get(cook , key string) (string, bool){
+	m.Lock()
+	defer m.Unlock()
 	if data_cook, found := m.Data[cook]; found {
 		return data_cook[key], true
 	} else {
