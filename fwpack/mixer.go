@@ -553,7 +553,7 @@ func (m *MixerCarry) GetParam(key string) string {
 //---------------------------------------------------------------------------
 //  возвращает все элементы запроса  url (&={value}&={value1} etc...)
 //---------------------------------------------------------------------------
-func (m *MixerCarry) GetQueryAll(key string) url.Values {
+func (m *MixerCarry) GetQueryAll() url.Values {
 	return m.r.URL.Query()
 }
 //---------------------------------------------------------------------------

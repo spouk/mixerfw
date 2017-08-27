@@ -20,7 +20,12 @@ import (
 	"time"
 	"crypto/md5"
 	"log"
+	"os"
 )
+const (
+	PREFIXLOGGERDBS = "[logger][mixerdb] "
+)
+
 type (
 	//---------------------------------------------------------------------------
 	//  DBS: основная структура
@@ -52,7 +57,11 @@ type (
 //---------------------------------------------------------------------------
 func NewDBS(dbinfo DBSInfoDatabase, logger *log.Logger) *MixerDBS {
 	dbs := new(MixerDBS)
-	dbs.logger = logger
+	if logger == nil {
+		dbs.logger = log.New(os.Stdout, PREFIXLOGGERDBS, 0)
+	} else {
+		dbs.logger = logger
+	}
 	db, err := gorm.Open(dbinfo.TypeDB, dbs.dns(dbinfo))
 	fmt.Printf("DBS: %#v : %#v\n", db, err)
 	if err != nil {
