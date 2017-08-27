@@ -46,6 +46,15 @@ type (
 		render MixerRender
 		//базовый конфиг
 		config MixerConfigDefault
+		//статичный контейнер
+		staticData *MixerStaticData
+	}
+	//---------------------------------------------------------------------------
+	//  MIXERSTATICDATA
+	//---------------------------------------------------------------------------
+	//cook, key, value
+	MixerStaticData struct {
+		Data map[string]map[string]string
 	}
 	//---------------------------------------------------------------------------
 	//  MIXERCONFIG: базовый конфиг
@@ -148,6 +157,8 @@ func NewMixer(config MixerConfigDefault) *Mixer {
 		}
 
 	}
+	//создаю mixerStaticData
+	m.staticData = m.newStaticMixerData()
 	//создаю дефолтный ассоциативный массив для миддов
 	m.middlestock = make(map[string][]MixerMiddleware)
 	//создаю дефолтный логгер
@@ -418,7 +429,31 @@ func (m *Mixer) AddRenderNewTemplatesFunction(mnemonic string, f interface{}) {
 func (m *Mixer) AddRenderNewTemplatesFunctionList(stack map[string]interface{}) {
 	m.render.AddFilters(stack)
 }
-
+//---------------------------------------------------------------------------
+//  MixerStaticData
+//---------------------------------------------------------------------------
+func (m *Mixer) newStaticMixerData() *MixerStaticData {
+	n := new(MixerStaticData)
+	n.Data = make(map[string]map[string]string)
+	return n
+}
+func (m *MixerStaticData) add(cook , key , value  string) bool{
+	m.Data[cook][key] = value
+	return true
+}
+func (m *MixerStaticData) get(cook , key string) (string, bool){
+	if data_cook, found := m.Data[cook]; found {
+		return data_cook[key], true
+	} else {
+		return "", false
+	}
+}
+func (m *Mixer) StaticDataAdd(cook , key , value  string) bool{
+	return m.staticData.add(cook, key, value)
+}
+func (m *Mixer) StaticDataGet(cook , key  string) (string, bool){
+	return m.staticData.get(cook, key)
+}
 //---------------------------------------------------------------------------
 //  MIXERCARRY: функционал
 //---------------------------------------------------------------------------
