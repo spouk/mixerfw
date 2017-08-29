@@ -301,6 +301,16 @@ func (m *Mixer) convertMixerHandlertohttprouterHandler(handler MixerHandler) htt
 	})
 
 }
+func (m *Mixer) convertMixerHandlertohttprouterHandler404(handler MixerHandler) http.HandlerFunc {
+	//обертываем хэндлер миддлами из стека
+	hhh := handler
+	newhandler := m.wrapperMiddlewares("", hhh)
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		newmux := m.getPool(w, r)
+		newhandler(newmux)
+		m.PutPool(newmux)
+	})
+}
 func (m *Mixer) addRoute(method, path, prefix string, s MixerHandler) {
 	//получаем имя хэндлера и добавляем в карту рутеров для визуализации
 	nameHandler := runtime.FuncForPC(reflect.ValueOf(s).Pointer()).Name()
@@ -415,7 +425,8 @@ func (m *Mixer) StaticFiles(realpath, wwwpath string) {
 
 //func (m *Mixer) StaticSingleFile()
 func (m *Mixer) Error404Handler(handler MixerHandler) {
-	m.router.NotFound = m.convertMixerHandlertohttprouterHandler(handler)
+	//m.router.NotFound = m.convertMixerHandlertohttprouterHandler(handler)
+	m.router.NotFound = m.convertMixerHandlertohttprouterHandler404(handler)
 }
 func (m *Mixer) Error405Handler(handler MixerHandler) {
 	m.router.MethodNotAllowed = m.convertMixerHandlertohttprouterHandler(handler)
