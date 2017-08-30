@@ -297,8 +297,8 @@ func NewMixerMail() *MixerMail {
 	return &MixerMail{MailMessage:MixerMailMessage{}}
 }
 func (mail MixerMailMessage) SendMail(message *MixerMailMessage) (error) {
-	d := gml.NewPlainDialer(message.Host, message.Port, message.Username, message.Password)
-	d.TLSConfig = &tls.Config{InsecureSkipVerify: true}
+	ds := gml.NewDialer(message.Host, message.Port, message.Username, message.Password)
+	ds.TLSConfig = &tls.Config{InsecureSkipVerify: true}
 	m := gml.NewMessage()
 	m.SetHeader("From", message.From)
 	m.SetHeader("To", message.To)
@@ -308,7 +308,7 @@ func (mail MixerMailMessage) SendMail(message *MixerMailMessage) (error) {
 	if message.FileAttach != "" {
 		m.Attach(message.FileAttach)
 	}
-	if err := d.DialAndSend(m); err != nil {
+	if err := ds.DialAndSend(m); err != nil {
 		fmt.Printf("[sendemail] ошибка отправки сообщения %v\n", err)
 		return errors.New(fmt.Sprintf("[sendemail] ошибка отправки сообщения %v\n", err))
 	}
@@ -318,9 +318,9 @@ func (mail MixerMailMessage) SendMail(message *MixerMailMessage) (error) {
 //  DATA:
 //---------------------------------------------------------------------------
 func NewMixerData() *MixerDATA {
-	d := make(MixerDATA)
-	d.setDefaultSection()
-	return &d
+	ds := make(MixerDATA)
+	ds.setDefaultSection()
+	return &ds
 }
 func (s MixerDATA) setDefaultSection() {
 	for _, x := range DATA_SECTION {
@@ -633,7 +633,7 @@ func (s *MixerSession) PaginateHTML(current_page int, count_on_page int, count_l
 		current_page = 1
 	}
 	current_page = int(current_page)
-	var tmp string = `<ul class="pagination"> %s </ul>`
+	var tmp string = `<ul class="mixer-pagination"> %s </ul>`
 	var START string = `<li><a class="%s" href="%s/page/%d" %s> < </a></li>`
 	var END string = `<li><a class="%s" href="%s/page/%d" %s> > </a></li>`
 	var LINK string = `	<li><a class="%s" href="%s/page/%d">%d</a></li>`

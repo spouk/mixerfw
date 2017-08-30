@@ -374,6 +374,14 @@ func (m *Mixer) RoutingMapGet() []MixerMapRoute {
 func (m *Mixer) ShowMiddlewares() {
 	m.logger.Printf("Middlewares: %v\n", m.middlestock)
 }
+func (m *Mixer) RequestInRoutingMap(realpath string) bool {
+	for _, v := range m.stockMapRoute {
+		if v.Prefix == realpath {
+			return true
+		}
+	}
+	return false
+}
 
 //---------------------------------------------------------------------------
 //  MIXER: субдомайны
@@ -496,6 +504,9 @@ func (m *MixerCarry) RealPath() string {
 
 	_, result, _, _ := m.m.router.LookupRoute(m.r.Method, m.r.URL.Path)
 	return result
+}
+func (m *MixerCarry) CheckPathInRoutingMap(realpath string) bool {
+	return m.m.RequestInRoutingMap(realpath)
 }
 //---------------------------------------------------------------------------
 //рендеринг шаблона
