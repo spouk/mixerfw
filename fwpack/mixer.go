@@ -470,7 +470,7 @@ func (m *MixerStaticData) add(cook , key , value  string) bool{
 }
 func (m *MixerStaticData) get(cook , key string) (string, bool){
 	m.Lock()
-	defer m.Unlock() 
+	defer m.Unlock()
 	if data_cook, found := m.Data[cook]; found {
 		return data_cook[key], true
 	} else {

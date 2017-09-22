@@ -13,6 +13,7 @@ import (
 	"os"
 	"io/ioutil"
 	"reflect"
+	"encoding/json"
 )
 
 //---------------------------------------------------------------------------
@@ -21,12 +22,13 @@ import (
 const (
 	letterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 )
+
 //---------------------------------------------------------------------------
 //  MIXERRENDERDEFAULT: определение дефолтных фильтров и функций
 //---------------------------------------------------------------------------
 var (
 	Local_filter = map[string]interface{}{
-		"random": RandomGenerator,
+		"random":  RandomGenerator,
 		"count":   strings.Count,
 		"split":   strings.Split,
 		"title":   strings.Title,
@@ -37,16 +39,16 @@ var (
 		"andlist": AndList,
 		"upper":   strings.ToUpper,
 
-		"unixtime": UnixtimeNormal,
-		"unixtimeformat" : UnixtimeNormalFormatData,
-		"unixtodata":UnixtimeNormalFormatData,
+		"unixtime":       UnixtimeNormal,
+		"unixtimeformat": UnixtimeNormalFormatData,
+		"unixtodata":     UnixtimeNormalFormatData,
 
-		"yesno" : YesNo,
+		"yesno": YesNo,
 		"html2": func(value string) template.HTML {
 			return template.HTML(fmt.Sprint(value))
 		},
-		"type" : TypeIs,
-
+		"type": TypeIs,
+		"jsonconvert" : JSONconvert,
 	}
 )
 //---------------------------------------------------------------------------
@@ -70,11 +72,12 @@ func NewMixerRenderDefault(path string, debug bool, logger MixerLogger) *MixerRe
 	sf.AddFilters(Local_filter)
 	sf.Path = path
 	sf.Debug = debug
-	if  logger != nil {
+	if logger != nil {
 		sf.logger = logger
 	}
 	return sf
 }
+
 //---------------------------------------------------------------------------
 //  MIXERRENDERDEFAULT: реализация интерфейса рендера для фреймворка
 //---------------------------------------------------------------------------
@@ -115,6 +118,7 @@ func (s *MixerRenderDefault) Render(name string, data interface{}, w io.Writer) 
 
 	return
 }
+
 //func (s *MixerRenderDefault) RenderBlock(name string, data interface{}, w io.Writer) (err error) {
 //	defer s.catcherPanic()
 //	if s.Debug || s.Temp == nil {
@@ -138,6 +142,7 @@ func (s *MixerRenderDefault) RenderCode(httpCode int, name string, data interfac
 
 	return
 }
+
 //render txt file
 func (s *MixerRenderDefault) RenderTxt(httpCode int, name string, w io.Writer) (err error) {
 	//read txt file
@@ -158,7 +163,6 @@ func (s *MixerRenderDefault) RenderTxt(httpCode int, name string, w io.Writer) (
 
 	return
 }
-
 
 //func (s *MixerRenderDefault) Render(name string, data interface{}, w io.Writer) error {
 //	defer s.catcherPanic()
@@ -191,6 +195,7 @@ func (s *MixerRenderDefault) HTMLTrims(body []byte) []byte {
 	}
 	return []byte(strings.Join(result, "\n"))
 }
+
 //func (s *MixerRenderDefault) SpoukRenderIO(name string, data interface{}, w http.ResponseWriter, reloadTemplate bool) (err error) {
 //	defer s.catcherPanic()
 //	if reloadTemplate || s.Temp == nil {
@@ -222,15 +227,24 @@ func TypeIs(value interface{}) string {
 	v := reflect.ValueOf(value)
 	var result string
 	switch v.Kind() {
-	case reflect.Bool: result = "bool"
-	case reflect.Int, reflect.Int8, reflect.Int32, reflect.Int64: result = "integer"
-	case reflect.Uint, reflect.Uint8, reflect.Uint32, reflect.Uint64: result = "unsigned integer"
-	case reflect.Float32, reflect.Float64: result = "float"
-	case reflect.String: result = "string"
-	case reflect.Slice: result = "slice"
-	case reflect.Map: result = "map"
-	case reflect.Chan: result = "chan"
-	default: result = "undefine type"
+	case reflect.Bool:
+		result = "bool"
+	case reflect.Int, reflect.Int8, reflect.Int32, reflect.Int64:
+		result = "integer"
+	case reflect.Uint, reflect.Uint8, reflect.Uint32, reflect.Uint64:
+		result = "unsigned integer"
+	case reflect.Float32, reflect.Float64:
+		result = "float"
+	case reflect.String:
+		result = "string"
+	case reflect.Slice:
+		result = "slice"
+	case reflect.Map:
+		result = "map"
+	case reflect.Chan:
+		result = "chan"
+	default:
+		result = "undefine type"
 	}
 	return result
 }
@@ -279,41 +293,49 @@ func YesNo(value bool, yes, no string) string {
 //---------------------------------------------------------------------------
 //  TIME Functions
 //---------------------------------------------------------------------------
-func  UnixtimeNormal(unixtime int64) string {
+func UnixtimeNormal(unixtime int64) string {
 	return time.Unix(unixtime, 0).String()
 }
+
 //UnixTime->HTML5Data
-func  UnixtimeNormalFormatData(unixtime int64) string {
+func UnixtimeNormalFormatData(unixtime int64) string {
 	return time.Unix(unixtime, 0).Format("2006-01-02")
 }
+
 //convert HTML5Data->UnixTime
 func HTML5DataToUnix(s string) int64 {
 	l := "2006-01-02"
-	r , _ := time.Parse(l, s)
+	r, _ := time.Parse(l, s)
 	return r.Unix()
 }
+
 //convert timeUnix->HTML5Datatime_local(string)
-func  TimeUnixToDataLocal(unixtime int64) string {
-	tmp_result := time.Unix(unixtime,0).Format(time.RFC3339)
-	g := strings.Join(strings.SplitAfterN(tmp_result,":",3)[:2],"")
+func TimeUnixToDataLocal(unixtime int64) string {
+	tmp_result := time.Unix(unixtime, 0).Format(time.RFC3339)
+	g := strings.Join(strings.SplitAfterN(tmp_result, ":", 3)[:2], "")
 	return g[:len(g)-1]
 }
+
 //convert HTML5Datatime_local(string)->TimeUnix
-func  DataLocalToTimeUnix(datatimeLocal string) int64 {
-	r,_ := time.Parse(time.RFC3339, datatimeLocal+":00Z")
+func DataLocalToTimeUnix(datatimeLocal string) int64 {
+	r, _ := time.Parse(time.RFC3339, datatimeLocal+":00Z")
 	return r.Unix()
 }
+
 //---------------------------------------------------------------------------
 //  RANDOM for Update Css and JS file in head pages
 //---------------------------------------------------------------------------
-func RandomGenerator() int{
+func RandomGenerator() int {
 	return rand.Intn(1000)
 }
-
-
-
-
-
-
-
-
+//---------------------------------------------------------------------------
+//  JSON CONVERT SUPPORT TEMPALTES
+//---------------------------------------------------------------------------
+func  JSONconvert(obj interface{}) string {
+	buf, err := json.Marshal(obj)
+	if err != nil {
+		fmt.Printf(err.Error())
+		return ""
+	}
+	return string(buf)
+}
